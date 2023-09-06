@@ -56,6 +56,7 @@
 SELECT
     *,
     '123' as aa,
+    '222' as dd,
     '456' as bb,
     '333' as cc
 FROM dwd_utc_00.dwd_integration_de_api_data_enrichment_contact_s_d
