@@ -1,0 +1,40 @@
+# https://docs.getdbt.com/reference/source-properties
+version: 2
+sources:
+  - name: ods_utc
+    schema: ods_utc
+    loader: dataworks
+    tables:
+      - name: ods_ae_core_rules_s_d
+        meta:
+            owner: null
+        columns:
+          - name: rule_id
+          - name: organization_id
+          - name: enabled
+          - name: name
+          - name: type
+          - name: generic_rule
+          - name: expression
+          - name: actions
+          - name: created_at
+          - name: updated_at
+          - name: processing_time
+          - name: processing_day
+      - name: ods_ae_core_settings_s_d
+        meta:
+            owner: null
+        columns:
+          - name: setting_id
+          - name: organization_id
+          - name: enabled
+          - name: display_mode
+          - name: order_cutoff_time
+          - name: timezone
+          - name: processing_days
+          - name: business_days
+          - name: created_at
+          - name: updated_at
+          - name: enabled_client_ip
+          - name: processing_time
+          - name: processing_day

@@ -1,0 +1,114 @@
+# Reusable YAML anchors
+anchors:
+  gcp-project-for-dbt-jobs-dev: &gcp-project-for-dbt-jobs-dev
+    aftership-team-data
+  gcp-project-for-dbt-jobs-test: &gcp-project-for-dbt-jobs-test
+    aftership-test
+  gcp-project-for-dbt-jobs-prod: &gcp-project-for-dbt-jobs-prod
+    automizely-data-warehouse
+
+# For more information on how to configure this file, please see:
+# https://docs.getdbt.com/docs/profile
+config:
+  partial_parse: True
+  send_anonymous_usage_stats: False
+
+default:
+  target: dev
+  outputs:
+    # It is used for local development.
+    dev:
+      type: bigquery
+      method: oauth
+      project: *gcp-project-for-dbt-jobs-dev
+      schema: temporary
+      # keyfile: ~/Google/Credentials/aftership-team-data.json
+      # priority: "{{ env_var('DBT_BIGQUERY_PRIORITY', 'interactive') }}"
+      # location: "{{ env_var('DBT_BIGQUERY_LOCATION', 'US') }}"
+      # If we quote `{{ env_var() }}`, it is interpreted as string. To avoid the situation, we use `|`.
+      threads: 2
+
+# The profile is used to run dbt jobs in the testing and production environment.
+dbt_multi_repo_test:
+  target: development
+  outputs:
+    # The target is for the development environment.
+    development:
+      type: bigquery
+      method: service-account
+      project: *gcp-project-for-dbt-jobs-dev
+      keyfile: ~/Google/Credentials/aftership-team-data.json
+      priority: "{{ env_var('DBT_BIGQUERY_PRIORITY', 'interactive') }}"
+      location: "{{ env_var('DBT_BIGQUERY_LOCATION', 'US') }}"
+      schema: "{{ env_var('SCHEMA', 'temporary') }}"
+      # If we quote `{{ env_var() }}`, it is interpreted as string. To avoid the situation, we use `|`.
+      threads: 1
+    # The target is for the testing environment.
+    testing:
+      type: bigquery
+      method: service-account-json
+      project: *gcp-project-for-dbt-jobs-test
+      location: "{{ env_var('DBT_BIGQUERY_LOCATION', 'US') }}"
+      priority: "{{ env_var('DBT_BIGQUERY_PRIORITY', 'interactive') }}"
+      schema: "{{ env_var('SCHEMA', 'temporary') }}"
+      # If we quote `{{ env_var() }}`, it is interpreted as integer. To avoid the situation, we use `|`.
+      threads: 1
+      # These fields come from the service account json keyfile
+      keyfile_json:
+        type: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_type') }}"
+        project_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_project_id') }}"
+        private_key_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key_id') }}"
+        private_key: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key') }}"
+        client_email: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_email') }}"
+        client_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_id') }}"
+        auth_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_uri') }}"
+        token_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_token_uri') }}"
+        auth_provider_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_provider_x509_cert_url') }}"
+        client_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_x509_cert_url') }}"
+    # The target is for the production environment.
+    production:
+      type: bigquery
+      method: service-account-json
+      project: *gcp-project-for-dbt-jobs-prod
+      location: "{{ env_var('DBT_BIGQUERY_LOCATION', 'US') }}"
+      priority: "{{ env_var('DBT_BIGQUERY_PRIORITY', 'interactive') }}"
+      schema: "{{ env_var('SCHEMA', 'temporary') }}"
+      threads: 1
+      # These fields come from the service account json keyfile
+      keyfile_json:
+        type: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_type') }}"
+        project_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_project_id') }}"
+        private_key_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key_id') }}"
+        private_key: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key') }}"
+        client_email: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_email') }}"
+        client_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_id') }}"
+        auth_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_uri') }}"
+        token_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_token_uri') }}"
+        auth_provider_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_provider_x509_cert_url') }}"
+        client_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_x509_cert_url') }}"
+
+# The profile is used to write metadata of BigQuery tables.
+dbt-metadata:
+  target: production
+  outputs:
+    production:
+      type: bigquery
+      method: service-account-json
+      project: *gcp-project-for-dbt-jobs-prod
+      location: "{{ env_var('DBT_BIGQUERY_LOCATION', 'US') }}"
+      priority: "{{ env_var('DBT_BIGQUERY_PRIORITY', 'interactive') }}"
+      schema: dbt_metadata
+      # If we quote `{{ env_var() }}`, it is interpreted as integer. To avoid the situation, we use `|`.
+      threads: 1
+      # These fields come from the service account json keyfile
+      keyfile_json:
+        type: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_type') }}"
+        project_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_project_id') }}"
+        private_key_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key_id') }}"
+        private_key: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_private_key') }}"
+        client_email: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_email') }}"
+        client_id: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_id') }}"
+        auth_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_uri') }}"
+        token_uri: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_token_uri') }}"
+        auth_provider_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_auth_provider_x509_cert_url') }}"
+        client_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_GOOGLE_CREDENTIALS_client_x509_cert_url') }}"

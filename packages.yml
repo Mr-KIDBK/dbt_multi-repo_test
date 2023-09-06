@@ -1,0 +1,3 @@
+#packages:
+#  - git: "git@github.com:AfterShip/scheduler-automizely-data-warehouse.git"
+#    revision: v0.0.20
